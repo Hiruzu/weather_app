@@ -5,7 +5,7 @@ Weather_App est une application météo légère développée principalement en 
 
 L'application offre plusieurs fonctionnalités :
 - Connaître la météo d'une ville. 
-- Obtenir également le taux de rayon UV ainsi que la qualité de l'air. 
+- Obtenir son taux de rayon UV ainsi que la qualité de l'air. 
 
 ## Comment faire fonctionner l'application ? 
 Nous supposons que vous utilisez un environnement Debian/Ubuntu 
