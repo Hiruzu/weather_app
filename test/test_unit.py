@@ -1,58 +1,59 @@
-import pytest
-import requests
+import unittest
 from unittest.mock import patch
-from app.backend import app
+import backend  # On importe directement le backend
 
-@pytest.fixture
-def client():
-    with app.test_client() as client:
-        yield client
+class WeatherAPITest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        """ Démarre une instance Flask pour les tests """
+        backend.app.testing = True
+        cls.client = backend.app.test_client()
 
-@patch("requests.get")
-def test_weather(mock_get, client):
-    mock_response = {
-        "city": "Paris",
-        "temperature": 15,
-        "description": "ciel dégagé",
-    }
+    @patch("backend.requests.get")
+    def test_home(self, mock_get):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Welcome to the Weather API", response.data)
 
-    mock_get.return_value.json.return_value = mock_response
-    mock_get.return_value.status_code = 200
+    @patch("backend.requests.get")
+    def test_weather_valid_city(self, mock_get):
+        mock_get.return_value.json.return_value = {
+            "main": {"temp": 20},
+            "weather": [{"description": "ciel dégagé"}]
+        }
 
-    response = client.get("/weather?city=Paris")
-    
-    assert response.status_code == 200
-    assert response.json == mock_response
+        response = self.client.get("/weather?city=Paris")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"temperature", response.data)
+        self.assertIn(b"ciel d", response.data)
 
-@patch("requests.get")
-def test_air_quality(mock_get, client):
-    mock_response = {
-        "city": "Paris",
-        "aqi": 2,
-        "description": "Air modérément pollué",
-    }
+    @patch("backend.requests.get")
+    def test_weather_invalid_city(self, mock_get):
+        mock_get.return_value.json.return_value = {"cod": "404", "message": "city not found"}
 
-    mock_get.return_value.json.return_value = mock_response
-    mock_get.return_value.status_code = 200
+        response = self.client.get("/weather?city=FakeCity")
+        self.assertEqual(response.status_code, 404)
+        self.assertIn(b"Ville non trouvée", response.data)
 
-    response = client.get("/air_quality?city=Paris")
-    
-    assert response.status_code == 200
-    assert response.json == mock_response
+    @patch("backend.requests.get")
+    def test_air_quality_valid_city(self, mock_get):
+        mock_get.return_value.json.return_value = {
+            "coord": {"lat": 48.8566, "lon": 2.3522},
+            "list": [{"main": {"aqi": 3}}]
+        }
 
-@patch("requests.get")
-def test_uv_index(mock_get, client):
-    mock_response = {
-        "city": "Paris",
-        "uv_index": 5,
-        "description": "Modéré",
-    }
+        response = self.client.get("/air_quality?city=Paris")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"air_quality_index", response.data)
 
-    mock_get.return_value.json.return_value = mock_response
-    mock_get.return_value.status_code = 200
+    @patch("backend.requests.get")
+    def test_uv_index_valid_city(self, mock_get):
+        mock_get.return_value.json.return_value = {"value": 5.5}
 
-    response = client.get("/uv_index?city=Paris")
-    
-    assert response.status_code == 200
-    assert response.json == mock_response
+        response = self.client.get("/uv_index?city=Paris")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"uv_index", response.data)
+
+if __name__ == "__main__":
+    unittest.main()
 
