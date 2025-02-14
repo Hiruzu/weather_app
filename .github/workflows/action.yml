@@ -33,6 +33,11 @@ jobs:
 
       - name: Check if Flask is running
         run: curl -I http://localhost:5000 || (cat flask.log && exit 1)
+        
+      - name: Start Docker containers
+        run: |
+          docker-compose up -d
+          sleep 10  # Attendre que Flask démarre complètement
 
       - name: Run tests
         run: pytest test/test_unit.py
