@@ -1,6 +1,8 @@
 import unittest
+import sys
+sys.path.append(".")
 from unittest.mock import patch
-import backend  # On importe directement le backend
+import backend
 
 class WeatherAPITest(unittest.TestCase):
     @classmethod
