@@ -7,12 +7,10 @@ on:
   pull_request:
     branches:
       - main
-  release:
-    types: [published]
 
 jobs:
   test:
-    name: Run Tests
+    name: Run Unit Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -28,8 +26,14 @@ jobs:
         run: |
           pip install -r requirements.txt
       
+      - name: Start Flask API
+        run: |
+          python backend.py &
+          sleep 5  # Attendre que le serveur démarre
+
       - name: Run tests
-        run: pytest test/test_unit.py
+        run: pytest tests/
+
 
   build-and-push:
     name: Build & Push Docker Image

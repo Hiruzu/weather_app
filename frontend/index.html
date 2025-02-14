@@ -5,30 +5,129 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather App</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        #weather-result { margin-top: 20px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to right, #56CCF2, #2F80ED);
+            color: white;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        input, button {
+            width: 80%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            outline: none;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        button {
+            background: #ff9f1c;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #ff6b00;
+        }
+
+        #weather-result {
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+
+        .weather-icon {
+            font-size: 50px;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
-    <h1>Weather App</h1>
-    <input type="text" id="city" placeholder="Entrez une ville">
-    <button onclick="getWeather()">Obtenir la météo</button>
-    <div id="weather-result"></div>
+    <h1>🌤 Weather App</h1>
+    <div class="container">
+        <input type="text" id="city" placeholder="Entrez une ville">
+        <button onclick="getWeather()">🔍 Obtenir la météo</button>
+        <div id="weather-result"></div>
+    </div>
 
     <script>
         function getWeather() {
             const city = document.getElementById("city").value;
-            fetch(`http://localhost:5000/weather?city=${city}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        document.getElementById("weather-result").innerText = data.error;
-                    } else {
-                        document.getElementById("weather-result").innerHTML = 
-                            `<h2>${data.city}</h2><p>Température: ${data.temperature}°C</p><p>${data.description}</p>`;
-                    }
-                })
-                .catch(error => console.error("Erreur:", error));
+            if (!city) {
+                alert("Veuillez entrer une ville !");
+                return;
+            }
+
+            // On va récupérer les trois types d’informations en une seule requête
+            Promise.all([
+                fetch(`http://localhost:5000/weather?city=${city}`).then(res => res.json()),
+                fetch(`http://localhost:5000/air_quality?city=${city}`).then(res => res.json()),
+                fetch(`http://localhost:5000/uv_index?city=${city}`).then(res => res.json())
+            ])
+            .then(([weatherData, airData, uvData]) => {
+                if (weatherData.error || airData.error || uvData.error) {
+                    document.getElementById("weather-result").innerHTML = `<p style="color: red;">❌ Erreur: Ville non trouvée</p>`;
+                    return;
+                }
+
+                const airQualityText = ["Bonne", "Acceptable", "Moyenne", "Mauvaise", "Dangereuse"];
+                const uvIndexText = getUVIndexDescription(uvData.uv_index);
+                const weatherIcon = getWeatherIcon(weatherData.description);
+
+                document.getElementById("weather-result").innerHTML = `
+                    <div class="weather-icon">${weatherIcon}</div>
+                    <h2>${weatherData.city}</h2>
+                    <p>🌡 Température: <strong>${weatherData.temperature}°C</strong></p>
+                    <p>${weatherData.description.charAt(0).toUpperCase() + weatherData.description.slice(1)}</p>
+                    <br>
+                    <hr>
+                    <br>
+                    <p>🌿 Qualité de l'air: <strong>${airQualityText[airData.air_quality_index - 1]}</strong></p>
+                    <p>🌞 Indice UV: <strong>${uvData.uv_index} (${uvIndexText})</strong></p>
+                `;
+            })
+            .catch(error => {
+                document.getElementById("weather-result").innerHTML = `<p style="color: red;">⚠ Erreur: Impossible de récupérer les données.</p>`;
+                console.error("Erreur:", error);
+            });
+        }
+
+        function getWeatherIcon(description) {
+            description = description.toLowerCase();
+            if (description.includes("clear")) return "☀";
+            if (description.includes("cloud")) return "☁";
+            if (description.includes("rain")) return "🌧";
+            if (description.includes("snow")) return "❄";
+            return "🌍";
+        }
+
+        function getUVIndexDescription(uv) {
+            if (uv < 3) return "Faible";
+            if (uv < 6) return "Modéré";
+            if (uv < 8) return "Élevé";
+            if (uv < 11) return "Très élevé";
+            return "Extrême";
         }
     </script>
 </body>
