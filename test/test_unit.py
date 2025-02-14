@@ -1,7 +1,11 @@
 import unittest
 import json
 from unittest.mock import patch
-import backend  # On importe directement le backend
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/.."))
+import backend
+
 
 class WeatherAPITest(unittest.TestCase):
     @classmethod
