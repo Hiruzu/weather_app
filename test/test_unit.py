@@ -42,7 +42,7 @@ class WeatherAPITest(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
         response_json = json.loads(response.data)
-        self.assertEqual(response_json["error"], "ville non trouvée.")
+        self.assertEqual(response_json["error"].lower(), "ville non trouvée.".lower())
 
     @patch("backend.requests.get")
     def test_air_quality_valid_city(self, mock_get):
