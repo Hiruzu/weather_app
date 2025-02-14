@@ -28,8 +28,11 @@ jobs:
       
       - name: Start Flask API
         run: |
-          python backend.py &
+          nohup python backend.py > flask.log 2>&1 &
           sleep 5  # Attendre que le serveur démarre
+
+      - name: Debug Flask logs
+        run: cat flask.log
 
       - name: Run tests
         run: pytest test/test_unit.py
