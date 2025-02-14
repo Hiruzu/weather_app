@@ -13,7 +13,7 @@ class WeatherAPITest(unittest.TestCase):
     def test_home(self, mock_get):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Welcome to the Weather API", response.data)
+        self.assertIn("Welcome to the Weather API".encode("utf-8"), response.data)
 
     @patch("backend.requests.get")
     def test_weather_valid_city(self, mock_get):
@@ -24,8 +24,8 @@ class WeatherAPITest(unittest.TestCase):
 
         response = self.client.get("/weather?city=Paris")
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"temperature", response.data)
-        self.assertIn(b"ciel d", response.data)
+        self.assertIn("temperature".encode("utf-8"), response.data)
+        self.assertIn("ciel dégagé".encode("utf-8"), response.data)
 
     @patch("backend.requests.get")
     def test_weather_invalid_city(self, mock_get):
@@ -33,7 +33,7 @@ class WeatherAPITest(unittest.TestCase):
 
         response = self.client.get("/weather?city=FakeCity")
         self.assertEqual(response.status_code, 404)
-        self.assertIn(b"Ville non trouvée", response.data)
+        self.assertIn("Ville non trouvee".encode("utf-8"), response.data.lower())  # Correction
 
     @patch("backend.requests.get")
     def test_air_quality_valid_city(self, mock_get):
@@ -44,7 +44,7 @@ class WeatherAPITest(unittest.TestCase):
 
         response = self.client.get("/air_quality?city=Paris")
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"air_quality_index", response.data)
+        self.assertIn("air_quality_index".encode("utf-8"), response.data)
 
     @patch("backend.requests.get")
     def test_uv_index_valid_city(self, mock_get):
@@ -52,7 +52,7 @@ class WeatherAPITest(unittest.TestCase):
 
         response = self.client.get("/uv_index?city=Paris")
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"uv_index", response.data)
+        self.assertIn("uv_index".encode("utf-8"), response.data)
 
 if __name__ == "__main__":
     unittest.main()
