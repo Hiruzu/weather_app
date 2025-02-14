@@ -32,7 +32,7 @@ jobs:
           sleep 5  # Attendre que le serveur démarre
 
       - name: Run tests
-        run: pytest tests/
+        run: pytest test/test_unit.py
 
 
   build-and-push:
