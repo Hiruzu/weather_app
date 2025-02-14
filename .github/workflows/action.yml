@@ -16,45 +16,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-      
+
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          
-      - name: Check Running Processes
-        run: sudo netstat -tulnp || true
-          
-      - name: Stop any running containers
-        run: docker stop $(docker ps -aq) || true
-
-      - name: Remove any existing containers
-        run: docker rm $(docker ps -aq) || true
-
-      - name: Remove any existing networks
-        run: docker network prune -f
-      
-      - name: Start Flask API
-        run: |
-          nohup python backend.py > flask.log 2>&1 &
-          sleep 5  # Attendre que le serveur démarre
-
-      - name: Check if Flask is running
-        run: curl -I http://localhost:5000 || (cat flask.log && exit 1)
-        
-      - name: Install Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
-
-      - name: Start Docker containers
-        run: |
-          docker-compose up -d
-          sleep 10  # Attendre que Flask démarre complètement
+        run: pip install -r requirements.txt
 
       - name: Run tests
         run: pytest test/test_unit.py

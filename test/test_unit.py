@@ -1,34 +1,58 @@
 import pytest
 import requests
-import os
-
-BASE_URL = "http://localhost:5000"
+from unittest.mock import patch
+from app.backend import app
 
 @pytest.fixture
-def test_city():
-    return "Paris"
+def client():
+    with app.test_client() as client:
+        yield client
 
-def test_weather(test_city):
-    response = requests.get(f"{BASE_URL}/weather?city={test_city}")
-    data = response.json()
+@patch("requests.get")
+def test_weather(mock_get, client):
+    mock_response = {
+        "city": "Paris",
+        "temperature": 15,
+        "description": "ciel dégagé",
+    }
+
+    mock_get.return_value.json.return_value = mock_response
+    mock_get.return_value.status_code = 200
+
+    response = client.get("/weather?city=Paris")
     
     assert response.status_code == 200
-    assert "temperature" in data
-    assert "description" in data
-    assert "city" in data
+    assert response.json == mock_response
 
-def test_air_quality(test_city):
-    response = requests.get(f"{BASE_URL}/air_quality?city={test_city}")
-    data = response.json()
+@patch("requests.get")
+def test_air_quality(mock_get, client):
+    mock_response = {
+        "city": "Paris",
+        "aqi": 2,
+        "description": "Air modérément pollué",
+    }
 
+    mock_get.return_value.json.return_value = mock_response
+    mock_get.return_value.status_code = 200
+
+    response = client.get("/air_quality?city=Paris")
+    
     assert response.status_code == 200
-    assert "air_quality_index" in data
-    assert 1 <= data["air_quality_index"] <= 5 
+    assert response.json == mock_response
 
-def test_uv_index(test_city):
-    response = requests.get(f"{BASE_URL}/uv_index?city={test_city}")
-    data = response.json()
+@patch("requests.get")
+def test_uv_index(mock_get, client):
+    mock_response = {
+        "city": "Paris",
+        "uv_index": 5,
+        "description": "Modéré",
+    }
 
+    mock_get.return_value.json.return_value = mock_response
+    mock_get.return_value.status_code = 200
+
+    response = client.get("/uv_index?city=Paris")
+    
     assert response.status_code == 200
-    assert "uv_index" in data
-    assert isinstance(data["uv_index"], (int, float))
+    assert response.json == mock_response
+
