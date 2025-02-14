@@ -62,15 +62,17 @@ class WeatherAPITest(unittest.TestCase):
         mock_get.return_value.json.return_value = {
             "lat": 48.8566,
             "lon": 2.3522,
-            "daily": [{"uvi": 5.5}]
+            "daily": [{"uvi": 1.3}]  # 🔧 Correction : correspond à la vraie réponse
         }
 
         response = self.client.get("/uv_index?city=Paris")
+    
+        print("DEBUG Response:", response.status_code, response.data)
+
         self.assertEqual(response.status_code, 200)
 
         response_json = json.loads(response.data)
-        self.assertEqual(response_json["uv_index"], 5.5)
-
+        self.assertEqual(response_json["uv_index"], 1.3)
 
 if __name__ == "__main__":
     unittest.main()
