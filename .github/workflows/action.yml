@@ -26,6 +26,9 @@ jobs:
         run: |
           pip install -r requirements.txt
           
+      - name: Check Running Processes
+        run: sudo netstat -tulnp || true
+          
       - name: Stop any running containers
         run: docker stop $(docker ps -aq) || true
 
