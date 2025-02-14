@@ -58,21 +58,28 @@ class WeatherAPITest(unittest.TestCase):
         self.assertIn("air_quality_index", response_json)
 
     @patch("backend.requests.get")
-    def test_uv_index_valid_city(self, mock_get):
-        mock_get.return_value.json.return_value = {
+    @patch("backend.requests.get")
+    def test_uv_index_valid_city(self, mock_weather, mock_uv):
+
+        mock_weather.return_value.json.return_value = {
+            "coord": {"lat": 48.8566, "lon": 2.3522}
+        }
+
+        mock_uv.return_value.json.return_value = {
             "lat": 48.8566,
             "lon": 2.3522,
-            "daily": [{"uvi": 1.3}]  # 🔧 Correction : correspond à la vraie réponse
+            "daily": [{"uvi": 1.3}]
         }
 
         response = self.client.get("/uv_index?city=Paris")
-    
-        print("DEBUG Response:", response.status_code, response.data)
+
+        print("DEBUG Response:", response.status_code, response.data)  # Debugging
 
         self.assertEqual(response.status_code, 200)
 
         response_json = json.loads(response.data)
         self.assertEqual(response_json["uv_index"], 1.3)
+
 
 if __name__ == "__main__":
     unittest.main()
