@@ -50,8 +50,8 @@ jobs:
       - name: Push Docker image
         if: github.ref == 'refs/heads/main' || github.event_name == 'release'
         run: |
-          docker tag myweatherapp:${{ github.sha }} mydockerhubuser/myweatherapp:latest
-          docker push mydockerhubuser/myweatherapp:latest
+          docker tag myweatherapp:${{ github.sha }} hiruzu123/myweatherapp:latest
+          docker push hiruzu123/myweatherapp:latest
 
 
   deploy:
@@ -62,4 +62,4 @@ jobs:
     steps:
       - name: Deploy to Server
         run: |
-          ssh user@server 'docker pull mydockerhubuser/myweatherapp:latest && docker run -d -p 80:5000 mydockerhubuser/myweatherapp'
+          ssh user@server 'docker pull hiruzu123/myweatherapp:latest && docker run -d -p 80:5000 hiruzu123/myweatherapp'
