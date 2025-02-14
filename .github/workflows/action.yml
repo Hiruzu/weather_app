@@ -31,8 +31,8 @@ jobs:
           nohup python backend.py > flask.log 2>&1 &
           sleep 5  # Attendre que le serveur démarre
 
-      - name: Debug Flask logs
-        run: cat flask.log
+      - name: Check if Flask is running
+        run: curl -I http://localhost:5000 || (cat flask.log && exit 1)
 
       - name: Run tests
         run: pytest test/test_unit.py
