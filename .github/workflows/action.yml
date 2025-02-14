@@ -31,6 +31,9 @@ jobs:
 
       - name: Remove any existing containers
         run: docker rm $(docker ps -aq) || true
+
+      - name: Remove any existing networks
+        run: docker network prune -f
       
       - name: Start Flask API
         run: |
