@@ -1,8 +1,7 @@
 import unittest
-import sys
-sys.path.append(".")
+import json
 from unittest.mock import patch
-import backend
+import backend  # On importe directement le backend
 
 class WeatherAPITest(unittest.TestCase):
     @classmethod
@@ -26,8 +25,10 @@ class WeatherAPITest(unittest.TestCase):
 
         response = self.client.get("/weather?city=Paris")
         self.assertEqual(response.status_code, 200)
-        self.assertIn("temperature".encode("utf-8"), response.data)
-        self.assertIn("ciel dégagé".encode("utf-8"), response.data)
+
+        response_json = json.loads(response.data)
+        self.assertEqual(response_json["description"], "ciel dégagé")
+        self.assertEqual(response_json["temperature"], 20)
 
     @patch("backend.requests.get")
     def test_weather_invalid_city(self, mock_get):
@@ -35,7 +36,9 @@ class WeatherAPITest(unittest.TestCase):
 
         response = self.client.get("/weather?city=FakeCity")
         self.assertEqual(response.status_code, 404)
-        self.assertIn("Ville non trouvee".encode("utf-8"), response.data.lower())  # Correction
+
+        response_json = json.loads(response.data)
+        self.assertEqual(response_json["error"], "ville non trouvée.")
 
     @patch("backend.requests.get")
     def test_air_quality_valid_city(self, mock_get):
@@ -46,7 +49,9 @@ class WeatherAPITest(unittest.TestCase):
 
         response = self.client.get("/air_quality?city=Paris")
         self.assertEqual(response.status_code, 200)
-        self.assertIn("air_quality_index".encode("utf-8"), response.data)
+        
+        response_json = json.loads(response.data)
+        self.assertIn("air_quality_index", response_json)
 
     @patch("backend.requests.get")
     def test_uv_index_valid_city(self, mock_get):
@@ -54,7 +59,9 @@ class WeatherAPITest(unittest.TestCase):
 
         response = self.client.get("/uv_index?city=Paris")
         self.assertEqual(response.status_code, 200)
-        self.assertIn("uv_index".encode("utf-8"), response.data)
+
+        response_json = json.loads(response.data)
+        self.assertEqual(response_json["uv_index"], 5.5)
 
 if __name__ == "__main__":
     unittest.main()
