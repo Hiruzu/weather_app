@@ -29,7 +29,7 @@ jobs:
           pip install -r requirements.txt
       
       - name: Run tests
-        run: pytest tests/test_unit.py
+        run: pytest test/test_unit.py
 
   build-and-push:
     name: Build & Push Docker Image
