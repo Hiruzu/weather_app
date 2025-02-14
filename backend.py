@@ -21,14 +21,14 @@ def weather():
     city = request.args.get("city")
 
     if not city:
-        return jsonify({"error": "veuillez fournir un nom de ville."}), 400
+        return jsonify({"error": "Veuillez fournir un nom de ville."}), 400
 
     params = {"q": city, "appid": API_KEY, "units": "metric"}
     response = requests.get(BASE_URL, params=params)
     data = response.json()
 
     if "main" not in data:
-        return jsonify({"error": "ville non trouvée."}), 404
+        return jsonify({"error": "Ville non trouvée."}), 404
 
     return jsonify({
         "city": city,
@@ -41,23 +41,25 @@ def air_quality():
     city = request.args.get("city")
 
     if not city:
-        return jsonify({"error": "veuillez fournir un nom de ville."}), 400
+        return jsonify({"error": "Veuillez fournir un nom de ville."}), 400
 
+    # Récupération des coordonnées de la ville
     params = {"q": city, "appid": API_KEY}
     response = requests.get(BASE_URL, params=params)
     data = response.json()
 
     if "coord" not in data:
-        return jsonify({"error": "ville non trouvée."}), 404
+        return jsonify({"error": "Ville non trouvée."}), 404
 
     lat, lon = data["coord"]["lat"], data["coord"]["lon"]
 
+    # Récupération de la pollution de l'air
     air_params = {"lat": lat, "lon": lon, "appid": API_KEY}
     air_response = requests.get(AIR_POLLUTION_URL, params=air_params)
     air_data = air_response.json()
 
     if "list" not in air_data:
-        return jsonify({"error": "données de pollution indisponibles."}), 404
+        return jsonify({"error": "Données de pollution indisponibles."}), 404
 
     air_quality_index = air_data["list"][0]["main"]["aqi"]
 
@@ -71,26 +73,27 @@ def uv_index():
     city = request.args.get("city")
 
     if not city:
-        return jsonify({"error": "veuillez fournir un nom de ville."}), 400
+        return jsonify({"error": "Veuillez fournir un nom de ville."}), 400
 
+    # Récupération des coordonnées de la ville
     params = {"q": city, "appid": API_KEY}
     response = requests.get(BASE_URL, params=params)
     data = response.json()
 
     if "coord" not in data:
-        return jsonify({"error": "ville non trouvée."}), 404
+        return jsonify({"error": "Ville non trouvée."}), 404
 
     lat, lon = data["coord"]["lat"], data["coord"]["lon"]
 
-    # ✅ Nouvelle méthode pour récupérer l'indice UV
-    uv_params = {"lat": lat, "lon": lon, "appid": API_KEY, "exclude": "current,minutely,hourly,alerts"}
+    # Récupération de l’indice UV
+    uv_params = {"lat": lat, "lon": lon, "appid": API_KEY}
     uv_response = requests.get(UV_INDEX_URL, params=uv_params)
     uv_data = uv_response.json()
 
-    if "daily" not in uv_data:
-        return jsonify({"error": "données UV indisponibles."}), 404
+    if "value" not in uv_data:
+        return jsonify({"error": "Données UV indisponibles."}), 404
 
-    uv_value = uv_data["daily"][0]["uvi"]
+    uv_value = uv_data["value"]
 
     return jsonify({
         "city": city,
@@ -99,4 +102,3 @@ def uv_index():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-

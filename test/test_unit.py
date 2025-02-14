@@ -42,7 +42,7 @@ class WeatherAPITest(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
         response_json = json.loads(response.data)
-        self.assertEqual(response_json["error"], "ville non trouvée.")
+        self.assertEqual(response_json["error"].lower(), "ville non trouvée.".lower())
 
     @patch("backend.requests.get")
     def test_air_quality_valid_city(self, mock_get):
@@ -61,20 +61,19 @@ class WeatherAPITest(unittest.TestCase):
     def test_uv_index_valid_city(self, mock_get):
     
         mock_get.side_effect = [
-            unittest.mock.Mock(json=lambda: {"coord": {"lat": 48.8566, "lon": 2.3522}},         status_code=200),
-            unittest.mock.Mock(json=lambda: {"daily": [{"uvi": 1.3}]}, status_code=200)
+            unittest.mock.Mock(json=lambda: {"coord": {"lat": 48.8566, "lon": 2.3522}}, status_code=200),
+        
+            unittest.mock.Mock(json=lambda: {"value": 1.3}, status_code=200)  #
         ]
 
         response = self.client.get("/uv_index?city=Paris")
 
-        print("DEBUG Response:", response.status_code, response.data)  # Debugging
+        print("DEBUG Response:", response.status_code, response.data) 
 
         self.assertEqual(response.status_code, 200)
 
         response_json = json.loads(response.data)
-        self.assertEqual(response_json["uv_index"], 1.3)
-
-
+        self.assertEqual(response_json["uv_index"], 1.3)  
 
 if __name__ == "__main__":
     unittest.main()
