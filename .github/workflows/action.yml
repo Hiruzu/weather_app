@@ -25,6 +25,12 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+          
+      - name: Stop any running containers
+        run: docker stop $(docker ps -aq) || true
+
+      - name: Remove any existing containers
+        run: docker rm $(docker ps -aq) || true
       
       - name: Start Flask API
         run: |
